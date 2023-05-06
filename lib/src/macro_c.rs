@@ -3,11 +3,12 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    punctuated::Punctuated,
     Error, Expr, FieldValue, Ident, Member, Result,
 };
 
-pub fn macro_c(input: TokenStream) -> TokenStream {
+use crate::utils::flatten_punctuated;
+
+pub fn c_impl(input: TokenStream) -> TokenStream {
     match syn::parse2::<CompExpr>(input) {
         Ok(comp_expr) => transform(comp_expr),
         Err(err) => err.into_compile_error(),
@@ -113,13 +114,6 @@ fn transform(comp_expr: CompExpr) -> TokenStream {
     }
 }
 
-fn flatten_punctuated<T, P>(punctuated: &Punctuated<T, P>) -> Vec<T>
-where
-    T: Clone,
-{
-    punctuated.iter().map(|arg| arg.clone()).collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -166,7 +160,7 @@ mod tests {
     #[test]
     fn test_macro_element_basic() {
         let input = quote!(div(child));
-        let output = macro_c(input);
+        let output = c_impl(input);
         let output_expected = quote! {
             ::leptos::leptos_dom::html::div(cx)
                 .child((cx, child))
@@ -178,7 +172,7 @@ mod tests {
     #[test]
     fn test_macro_element_with_event_handler() {
         let input = quote!(button { on_click: |_| {} }("Click me"));
-        let output = macro_c(input);
+        let output = c_impl(input);
         let output_expected = quote! {
             ::leptos::leptos_dom::html::button(cx)
                 .child((cx, "Click me"))
@@ -191,7 +185,7 @@ mod tests {
     #[test]
     fn test_macro_element_with_on_mount_handler() {
         let input = quote!(div { on_mount: |_| {} });
-        let output = macro_c(input);
+        let output = c_impl(input);
         let output_expected = quote! {
             ::leptos::leptos_dom::html::div(cx)
                 .attr("class", (cx, style))
@@ -203,7 +197,7 @@ mod tests {
     #[test]
     fn test_macro_component_basic() {
         let input = quote!(Main { some_int: 42 });
-        let output = macro_c(input);
+        let output = c_impl(input);
         let output_expected = quote! {
             Main(cx, MainProps::builder().some_int(42).build())
         };

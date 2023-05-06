@@ -1,5 +1,6 @@
 use syn::{
     parse::{Parse, ParseStream},
+    punctuated::Punctuated,
     Expr, Result, Token,
 };
 
@@ -14,4 +15,11 @@ impl Parse for Expressions {
             .collect();
         Ok(Expressions(expressions))
     }
+}
+
+pub fn flatten_punctuated<T, P>(punctuated: &Punctuated<T, P>) -> Vec<T>
+where
+    T: Clone,
+{
+    punctuated.iter().map(|arg| arg.clone()).collect()
 }

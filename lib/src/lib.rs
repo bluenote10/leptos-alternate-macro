@@ -1,6 +1,6 @@
-mod expressions;
+mod macro_c;
 mod macro_fragment;
-mod macro_impl;
+mod utils;
 
 #[cfg(test)]
 mod test_utils;
@@ -12,7 +12,7 @@ use proc_macro::TokenStream;
 pub fn c(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
 
-    let output = macro_impl::macro_c(input);
+    let output = macro_c::c_impl(input);
 
     proc_macro::TokenStream::from(output)
 }
@@ -21,7 +21,7 @@ pub fn c(input: TokenStream) -> TokenStream {
 pub fn fragment(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
 
-    let output = macro_fragment::fragment(input);
+    let output = macro_fragment::fragment_impl(input);
 
     proc_macro::TokenStream::from(output)
 }

@@ -2,9 +2,9 @@ extern crate proc_macro;
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use crate::expressions::Expressions;
+use crate::utils::Expressions;
 
-pub fn fragment(input: TokenStream) -> TokenStream {
+pub fn fragment_impl(input: TokenStream) -> TokenStream {
     match syn::parse2::<Expressions>(input) {
         Ok(expressions) => transform(expressions),
         Err(err) => err.into_compile_error(),
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn test_fragment_single_child() {
         let input = quote!(child_a);
-        let output = fragment(input);
+        let output = fragment_impl(input);
         let output_expected = quote! {
             ::leptos::Fragment::lazy(|| <[_]>::into_vec(
                 #[rustc_box]
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn test_fragment_multiple_children() {
         let input = quote!(child_a, child_b);
-        let output = fragment(input);
+        let output = fragment_impl(input);
         let output_expected = quote! {
             ::leptos::Fragment::lazy(|| <[_]>::into_vec(
                 #[rustc_box]
