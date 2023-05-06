@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "alternate_dsl",
+    "reference_expand",
+]
