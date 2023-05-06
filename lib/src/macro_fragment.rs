@@ -1,4 +1,3 @@
-extern crate proc_macro;
 use proc_macro2::TokenStream;
 use quote::quote;
 
@@ -13,11 +12,15 @@ pub fn fragment_impl(input: TokenStream) -> TokenStream {
 
 fn transform(expressions: Expressions) -> TokenStream {
     let expressions = expressions.0;
+    // Initially I got confused by the output of `cargo expand` which actually showed
+    // that leptos was outputting `#[rustc_box] ::alloc::boxed::Box::new(...)`. However,
+    // this leads to an error at use site about the alloc crate not being imported.
+    // Looking at the leptos code, it rather seems to generate a plain `Box::new(...)`.
+    // Most likely the "decoration" have been introduced by `cargo expand`.
     let output = quote! {
         ::leptos::Fragment::lazy(|| <[_]>::into_vec(
-            #[rustc_box]
-            ::alloc::boxed::Box::new([
-                #(#expressions),*
+            Box::new([
+                #(#expressions.into_view(cx)),*
             ]),
         ))
     };
@@ -64,8 +67,7 @@ mod tests {
         let output = fragment_impl(input);
         let output_expected = quote! {
             ::leptos::Fragment::lazy(|| <[_]>::into_vec(
-                #[rustc_box]
-                ::alloc::boxed::Box::new([child_a]),
+                Box::new([child_a.into_view(cx)]),
             ))
         };
         compare!(output, output_expected);
@@ -77,8 +79,7 @@ mod tests {
         let output = fragment_impl(input);
         let output_expected = quote! {
             ::leptos::Fragment::lazy(|| <[_]>::into_vec(
-                #[rustc_box]
-                ::alloc::boxed::Box::new([child_a, child_b]),
+                Box::new([child_a.into_view(cx), child_b.into_view(cx)]),
             ))
         };
         compare!(output, output_expected);

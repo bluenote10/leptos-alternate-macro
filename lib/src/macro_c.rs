@@ -1,4 +1,3 @@
-extern crate proc_macro;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
@@ -164,6 +163,17 @@ mod tests {
         let output_expected = quote! {
             ::leptos::leptos_dom::html::div(cx)
                 .child((cx, child))
+                .attr("class", (cx, style))
+        };
+        compare!(output, output_expected);
+    }
+
+    #[test]
+    fn test_macro_element_without_anything() {
+        let input = quote!(br);
+        let output = c_impl(input);
+        let output_expected = quote! {
+            ::leptos::leptos_dom::html::br(cx)
                 .attr("class", (cx, style))
         };
         compare!(output, output_expected);
